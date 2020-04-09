@@ -1,0 +1,23 @@
+set -e
+
+# clone github
+cd /home/eric/
+rm -rf cp-vton
+git clone https://github.com/ericguillaume/cp-vton.git
+cd cp-vton
+git checkout master
+
+# extract data
+rm -rf /home/eric/dev/data/cp-vton-data
+mkdir -p /home/eric/dev/data
+cd /home/eric/dev/data
+tar -xzf /tmp/cp-vton-data.tar.gz
+
+# link data
+cd /home/eric/cp-vton
+ln -s /home/eric/dev/data/cp-vton-data/data/train ./data/train
+ln -s /home/eric/dev/data/cp-vton-data/data/test ./data/test
+
+# install requirements
+cd /home/eric/cp-vton
+pip3 install --ignore-installed -r requirements.txt  # warning requirements are not full
