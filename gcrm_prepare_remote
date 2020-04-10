@@ -21,3 +21,9 @@ ln -s /home/eric/dev/data/cp-vton-data/data/test ./data/test
 # install requirements
 cd /home/eric/cp-vton
 pip3 install --ignore-installed -r requirements.txt  # warning requirements are not full
+
+# conda create -n cp-vton python=3.5.6
+
+# conda env create -f environment.yml -n cp-vton
+# conda activate cp-vton
+
