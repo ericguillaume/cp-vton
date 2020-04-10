@@ -18,7 +18,7 @@ def get_opt():
     parser.add_argument("--name", default = "GMM")
     parser.add_argument("--gpu_ids", default = "")
     parser.add_argument('-j', '--workers', type=int, default=1)
-    parser.add_argument('-b', '--batch-size', type=int, default=4)
+    parser.add_argument('-b', '--batch-size', type=int, default=4)  # isnt it too small ?
     
     parser.add_argument("--dataroot", default = "data")
     parser.add_argument("--datamode", default = "train")
@@ -46,7 +46,7 @@ def train_gmm(opt, train_loader, model, board):
     model.train()
 
     # criterion
-    criterionL1 = nn.L1Loss()
+    criterionL1 = nn.L1Loss() # not reduced
     
     # optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(0.5, 0.999))
@@ -119,9 +119,9 @@ def train_tom(opt, train_loader, model, board):
         cm = inputs['cloth_mask'].cuda()
         
         outputs = model(torch.cat([agnostic, c],1))
-        p_rendered, m_composite = torch.split(outputs, 3,1)
+        p_rendered, m_composite = torch.split(outputs, 3,1)  # split in 3 ?? according to dim 1 ???
         p_rendered = F.tanh(p_rendered)
-        m_composite = F.sigmoid(m_composite)
+        m_composite = F.sigmoid(m_composite)  # revoir en detail
         p_tryon = c * m_composite+ p_rendered * (1 - m_composite)
 
         visuals = [ [im_h, shape, im_pose], 
