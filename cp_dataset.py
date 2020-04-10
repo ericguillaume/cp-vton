@@ -2,6 +2,7 @@
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 from PIL import Image
 from PIL import ImageDraw
@@ -9,6 +10,30 @@ from PIL import ImageDraw
 import os.path as osp
 import numpy as np
 import json
+
+
+def _debug_to_array(np_array):
+    if type(np_array) is Image.Image:
+        return np.array(np_array)
+    return np_array
+
+def debug_print(value, title):
+    np_array = _debug_to_array(value)
+    print("type({}) = {}".format(title, type(np_array)))
+    print("{}.shape = {}".format(title, np_array.shape))
+    print("{}.dtype = {}".format(title, np_array.dtype))
+    print("np.unique({}) = {}".format(title, np.unique(np_array)))
+    print()
+
+def debug_plot(value, title):
+    np_array = _debug_to_array(value)
+    debug_print(np_array, title)
+
+    img = Image.fromarray(np.uint8(np_array))
+    plt.imshow(img)
+    plt.title(title)
+    plt.show()
+    plt.title("")
 
 class CPDataset(data.Dataset):
     """Dataset for CP-VTON.
@@ -77,12 +102,12 @@ class CPDataset(data.Dataset):
                 (parse_array == 13).astype(np.float32)
         parse_cloth = (parse_array == 5).astype(np.float32) + \
                 (parse_array == 6).astype(np.float32) + \
-                (parse_array == 7).astype(np.float32)  # ??? visualiser ces chiffres
+                (parse_array == 7).astype(np.float32)  # 3 elements numpy array float32 (256, 192)
 
-        print("parse_head.shape = {}".format(parse_head.shape))
-        #Image.fromarray()
-        exit()
-       
+        # debug_print(parse_head, "parse_head")
+        # debug_print(parse_shape, "parse_shape")
+        # debug_print(parse_cloth, "parse_cloth")
+
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
         parse_shape = parse_shape.resize((self.fine_width//16, self.fine_height//16), Image.BILINEAR)
@@ -118,6 +143,9 @@ class CPDataset(data.Dataset):
                 pose_draw.rectangle((pointx-r, pointy-r, pointx+r, pointy+r), 'white', 'white')
             one_map = self.transform(one_map)
             pose_map[i] = one_map[0]
+
+        # debug_plot(im_pose, "im_pose")
+        # exit()
 
         # just for visualization
         im_pose = self.transform(im_pose)
