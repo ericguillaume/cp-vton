@@ -2,6 +2,7 @@
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 from PIL import Image
 from PIL import ImageDraw
@@ -9,6 +10,30 @@ from PIL import ImageDraw
 import os.path as osp
 import numpy as np
 import json
+
+
+def _debug_to_array(np_array):
+    if type(np_array) is Image.Image:
+        return np.array(np_array)
+    return np_array
+
+def debug_print(value, title):
+    np_array = _debug_to_array(value)
+    print("type({}) = {}".format(title, type(np_array)))
+    print("{}.shape = {}".format(title, np_array.shape))
+    print("{}.dtype = {}".format(title, np_array.dtype))
+    print("np.unique({}) = {}".format(title, np.unique(np_array)))
+    print()
+
+def debug_plot(value, title):
+    np_array = _debug_to_array(value)
+    debug_print(np_array, title)
+
+    img = Image.fromarray(np.uint8(np_array))
+    plt.imshow(img)
+    plt.title(title)
+    plt.show()
+    plt.title("")
 
 class CPDataset(data.Dataset):
     """Dataset for CP-VTON.
@@ -77,8 +102,12 @@ class CPDataset(data.Dataset):
                 (parse_array == 13).astype(np.float32)
         parse_cloth = (parse_array == 5).astype(np.float32) + \
                 (parse_array == 6).astype(np.float32) + \
-                (parse_array == 7).astype(np.float32)
-       
+                (parse_array == 7).astype(np.float32)  # 3 elements numpy array float32 (256, 192)
+
+        # debug_print(parse_head, "parse_head")
+        # debug_print(parse_shape, "parse_shape")
+        # debug_print(parse_cloth, "parse_cloth")
+
         # shape downsample
         parse_shape = Image.fromarray((parse_shape*255).astype(np.uint8))
         parse_shape = parse_shape.resize((self.fine_width//16, self.fine_height//16), Image.BILINEAR)
@@ -89,7 +118,7 @@ class CPDataset(data.Dataset):
 
         # upper cloth
         im_c = im * pcm + (1 - pcm) # [-1,1], fill 1 for other parts
-        im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts
+        im_h = im * phead - (1 - phead) # [-1,1], fill 0 for other parts        # multiplie par phead im ???
 
         # load pose points
         pose_name = im_name.replace('.jpg', '_keypoints.json')
@@ -115,11 +144,14 @@ class CPDataset(data.Dataset):
             one_map = self.transform(one_map)
             pose_map[i] = one_map[0]
 
+        # debug_plot(im_pose, "im_pose")
+        # exit()
+
         # just for visualization
         im_pose = self.transform(im_pose)
         
         # cloth-agnostic representation
-        agnostic = torch.cat([shape, im_h, pose_map], 0) 
+        agnostic = torch.cat([shape, im_h, pose_map], 0)   # todo(eric) visualiser
 
         if self.stage == 'GMM':
             im_g = Image.open('grid.png')
@@ -150,14 +182,16 @@ class CPDataLoader(object):
     def __init__(self, opt, dataset):
         super(CPDataLoader, self).__init__()
 
+        print("opt.shuffle = {}".format(opt.shuffle))
         if opt.shuffle :
+            print("using shuffle")
             train_sampler = torch.utils.data.sampler.RandomSampler(dataset)
         else:
             train_sampler = None
 
         self.data_loader = torch.utils.data.DataLoader(
                 dataset, batch_size=opt.batch_size, shuffle=(train_sampler is None),
-                num_workers=opt.workers, pin_memory=True, sampler=train_sampler)
+                num_workers=opt.workers, pin_memory=True, sampler=3)
         self.dataset = dataset
         self.data_iter = self.data_loader.__iter__()
        

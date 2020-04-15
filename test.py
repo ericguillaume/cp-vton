@@ -93,7 +93,7 @@ def test_tom(opt, test_loader, model, board):
     save_dir = os.path.join(opt.result_dir, base_name, opt.datamode)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    try_on_dir = os.path.join(save_dir, 'try-on')
+    try_on_dir = os.path.join(save_dir, 'try-on')  # sauve les images generees
     if not os.path.exists(try_on_dir):
         os.makedirs(try_on_dir)
     print('Dataset size: %05d!' % (len(test_loader.dataset)), flush=True)
