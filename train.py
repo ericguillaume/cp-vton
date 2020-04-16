@@ -2,10 +2,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 import argparse
 import os
 import time
+
+from PIL import Image
+
 from cp_dataset import CPDataset, CPDataLoader
 from networks import GMM, UnetGenerator, VGGLoss, load_checkpoint, save_checkpoint
 
@@ -38,6 +42,8 @@ def get_opt():
     parser.add_argument("--decay_step", type=int, default = 100000)
     parser.add_argument("--shuffle", action='store_true', help='shuffle input data')
     parser.add_argument("--use_gpu", action='store_true')
+    parser.add_argument('--log_dir', type=str, default='log', help='log generated images')
+    parser.add_argument('--log_step', type=int, default=100)
 
     opt = parser.parse_args()
     return opt
@@ -93,7 +99,17 @@ def train_gmm(opt, train_loader, model, board):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-            
+
+        if (step+1) % opt.log_step == 0:
+            wc_folder = os.path.join(opt.log_dir, opt.name, 'generated_warped_cloth')
+            if not os.path.exists(wc_folder):
+                os.makedirs(wc_folder)
+
+            warped_cloth_array = np.moveaxis(warped_cloth.detach().numpy()[0], 0, -1)
+            warped_cloth_image = Image.fromarray(warped_cloth_array, 'RGB')
+            wc_filepath = os.path.join(wc_folder, 'step_%06d.png' % (step+1))
+            warped_cloth_image.save(wc_filepath)
+
         if (step+1) % opt.display_count == 0:
             board_add_images(board, 'combine', visuals, step+1)
             board.add_scalar('metric', loss.item(), step+1)
