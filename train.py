@@ -36,6 +36,7 @@ def get_opt():
     parser.add_argument('--tensorboard_dir', type=str, default='tensorboard', help='save tensorboard infos')
     parser.add_argument('--checkpoint_dir', type=str, default='checkpoints', help='save checkpoint infos')
     parser.add_argument('--checkpoint', type=str, default='', help='model checkpoint for initialization')
+    parser.add_argument('--checkpoint_last_step', type=int, default=0, help='step we stopped at, at checkpoint')
     parser.add_argument("--display_count", type=int, default = 20)  # display every X images on tensorboard
     parser.add_argument("--save_count", type=int, default = 100)  # save checkpoint every X steps
     parser.add_argument("--keep_step", type=int, default = 100000)
@@ -61,7 +62,7 @@ def train_gmm(opt, train_loader, model, board):
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda = lambda step: 1.0 -
             max(0, step - opt.keep_step) / float(opt.decay_step + 1))
     
-    for step in range(opt.keep_step + opt.decay_step):
+    for step in range(opt.checkpoint_last_step, opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
         inputs = train_loader.next_batch()
             
@@ -135,7 +136,7 @@ def train_tom(opt, train_loader, model, board):
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda = lambda step: 1.0 -
             max(0, step - opt.keep_step) / float(opt.decay_step + 1))
     
-    for step in range(opt.keep_step + opt.decay_step):
+    for step in range(opt.checkpoint_last_step, opt.keep_step + opt.decay_step):
         iter_start_time = time.time()
         inputs = train_loader.next_batch()
             
