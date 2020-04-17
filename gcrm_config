@@ -1,6 +1,11 @@
 #!/bin/bash
 
-export GCRM_MACHINE_TYPE=GPU  # CPU GPU
-export GCRM_ZONE=us-central1-a  # europe-west2-c us-central1-b europe-west4-a
+export GCRM_MACHINE_TYPE=CPU  # CPU GPU
+export GCRM_ZONE=us-central1-b  # europe-west2-c us-central1-b europe-west4-a
 
-export GCRM_SPECIAL_MACHINE_IMAGE_FAMILY=pytorch-0-4-cu91  # can be left empty
+export GCRM_SPECIAL_MACHINE_IMAGE_FAMILY=  # can be left empty
+
+# machine gpu t4 or k80 (worked only on us-central1-b or us-central1-a)
+
+# pytorch-0-4-cu91 had only 30go vs 50go and it took > 40% CPU for more than
+#   10 minutes to install everything (and not finished), couldnt ssh
