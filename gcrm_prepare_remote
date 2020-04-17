@@ -18,8 +18,12 @@ cd /home/eric/cp-vton
 ln -s /home/eric/dev/data/cp-vton-data/data/train ./data/train
 ln -s /home/eric/dev/data/cp-vton-data/data/test ./data/test
 
+# install conda
+rm -rf $HOME/miniconda
+sudo ln -s /usr/bin/md5sum /usr/bin/md5
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda
+
 # install requirements
 cd /home/eric/cp-vton
 conda env create -f environment.yml -n cp-vton
-conda activate cp-vton
-python3 train.py --workers 0 --keep_step 2 --decay_step 2 --save_count 2 --display_count 2
