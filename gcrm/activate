@@ -33,7 +33,7 @@ then
 elif [[ $GCRM_MACHINE_TYPE = "GPU" ]]
 then
     export GCRM_MACHINE_IMAGE_FAMILY=tf-2-1-cu100
-    export GCRM_MACHINE_START_OPTIONS='--accelerator=type=nvidia-tesla-k80,count=1 --metadata=install-nvidia-driver=True'
+    export GCRM_MACHINE_START_OPTIONS='--accelerator=type=nvidia-tesla-t4,count=1 --metadata=install-nvidia-driver=True'
 fi
 
 if [ -z "GCRM_SPECIAL_MACHINE_IMAGE_FAMILY" ]
